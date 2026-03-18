@@ -1,0 +1,24 @@
+{
+  "name": "google-classroom-mcp",
+  "version": "1.0.0",
+  "description": "Model Context Protocol server for comprehensive Google Classroom management",
+  "type": "module",
+  "bin": {
+    "google-classroom-mcp": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.1",
+    "dotenv": "^16.4.5",
+    "google-auth-library": "^9.14.1",
+    "googleapis": "^144.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.9",
+    "typescript": "^5.5.2"
+  }
+}
