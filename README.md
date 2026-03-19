@@ -4,7 +4,7 @@
 ![Node.js](https://img.shields.io/badge/Node.js-18%2B-green?logo=node.js)
 ![License](https://img.shields.io/badge/license-MIT-brightgreen)
 ![MCP](https://img.shields.io/badge/MCP-compatible-purple)
-![Tools](https://img.shields.io/badge/tools-43-orange)
+![Tools](https://img.shields.io/badge/tools-46-orange)
 
 A [Model Context Protocol](https://modelcontextprotocol.io) (MCP) server that gives AI agents full programmatic access to Google Classroom. Built to enable complex, multi-step automation workflows for educators: from bulk assignment creation and roster management to submission collection, grading, and Drive file delivery.
 
@@ -14,7 +14,7 @@ AI agents need structured, reliable access to educational platforms to be genuin
 
 ## Features
 
-- **43 fully implemented tools** — courses, topics, assignments, materials, announcements, submissions, grading, rosters, guardians, rubrics, and Drive file management
+- **46 fully implemented tools** — courses, topics, assignments, materials, announcements, submissions, grading, rosters, guardians, rubrics, and Drive file management
 - **Google Drive integration** — upload files to Drive and attach them to assignments; download student submission PDFs
 - **Compact responses by default** — list operations return only essential fields to stay within MCP token limits; pass `fullData: true` for complete objects
 - **OAuth2 authentication** with persistent token storage and automatic refresh
@@ -185,6 +185,7 @@ The server requests the following scopes during `node auth.js`:
 
 | Tool | Required params | Optional params | Description |
 |------|----------------|-----------------|-------------|
+| `classroom_get_topic` | `courseId`, `id` | — | Get details of a specific topic |
 | `classroom_list_topics` | `courseId` | — | List all topics in a course |
 | `classroom_create_topic` | `courseId`, `name` | — | Create a new topic/unit |
 | `classroom_patch_topic` | `courseId`, `id`, `name` | — | Rename a topic |
@@ -194,6 +195,7 @@ The server requests the following scopes during `node auth.js`:
 
 | Tool | Required params | Optional params | Description |
 |------|----------------|-----------------|-------------|
+| `classroom_get_assignment` | `courseId`, `id` | — | Get full details of a single assignment |
 | `classroom_list_assignments` | `courseId` | `courseWorkStates`, `pageSize`, `pageToken` | List assignments. `courseWorkStates`: PUBLISHED, DRAFT |
 | `classroom_create_assignment` | `courseId`, `title` | `description`, `workType`, `state`, `maxPoints`, `dueDate` (YYYY-MM-DD), `dueTime` (HH:MM), `topicId`, `attachments` | Create assignment or question |
 | `classroom_patch_assignment` | `courseId`, `id`, `updateMask` | `title`, `description`, `maxPoints`, `topicId`, `dueDate`, `dueTime`, `state` | Partial update via updateMask |
@@ -215,6 +217,7 @@ The server requests the following scopes during `node auth.js`:
 
 | Tool | Required params | Optional params | Description |
 |------|----------------|-----------------|-------------|
+| `classroom_get_material` | `courseId`, `id` | — | Get full details of a specific material |
 | `classroom_list_materials` | `courseId` | `pageSize` | List all non-graded materials |
 | `classroom_create_material` | `courseId`, `title` | `description`, `topicId`, `attachments` | Create a material post |
 | `classroom_patch_material` | `courseId`, `id`, `updateMask` | `title`, `description`, `topicId`, `state` | Update material fields |

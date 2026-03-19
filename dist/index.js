@@ -179,6 +179,18 @@ class GoogleClassroomServer {
             },
             // ── COURSEWORK (ASSIGNMENTS / QUESTIONS) ─────────────────────────────
             {
+                name: 'classroom_get_assignment',
+                description: 'Get full details of a specific assignment by ID.',
+                inputSchema: {
+                    type: 'object',
+                    properties: {
+                        courseId: { type: 'string' },
+                        id: { type: 'string', description: 'Assignment (courseWork) ID' },
+                    },
+                    required: ['courseId', 'id'],
+                },
+            },
+            {
                 name: 'classroom_list_assignments',
                 description: 'List coursework (assignments/questions) for a course. Supports filtering by state.',
                 inputSchema: {
@@ -331,6 +343,18 @@ class GoogleClassroomServer {
             },
             // ── TOPICS ────────────────────────────────────────────────────────────
             {
+                name: 'classroom_get_topic',
+                description: 'Get details of a specific topic by ID.',
+                inputSchema: {
+                    type: 'object',
+                    properties: {
+                        courseId: { type: 'string' },
+                        id: { type: 'string', description: 'Topic ID' },
+                    },
+                    required: ['courseId', 'id'],
+                },
+            },
+            {
                 name: 'classroom_list_topics',
                 description: 'List all topics in a course.',
                 inputSchema: {
@@ -377,6 +401,18 @@ class GoogleClassroomServer {
                 },
             },
             // ── MATERIALS ─────────────────────────────────────────────────────────
+            {
+                name: 'classroom_get_material',
+                description: 'Get full details of a specific course material by ID.',
+                inputSchema: {
+                    type: 'object',
+                    properties: {
+                        courseId: { type: 'string' },
+                        id: { type: 'string', description: 'Material ID' },
+                    },
+                    required: ['courseId', 'id'],
+                },
+            },
             {
                 name: 'classroom_list_materials',
                 description: 'List all non-graded materials for a course.',
@@ -787,6 +823,13 @@ class GoogleClassroomServer {
                 return ok({ deleted: true, courseId: args.courseId });
             }
             // ── COURSEWORK ─────────────────────────────────────────────────────
+            case 'classroom_get_assignment': {
+                const r = await classroom.courses.courseWork.get({
+                    courseId: args.courseId,
+                    id: args.id,
+                });
+                return ok(r.data);
+            }
             case 'classroom_list_assignments': {
                 const r = await classroom.courses.courseWork.list({
                     courseId: args.courseId,
@@ -913,6 +956,13 @@ class GoogleClassroomServer {
                 return ok(r.data ?? { returned: true });
             }
             // ── TOPICS ─────────────────────────────────────────────────────────
+            case 'classroom_get_topic': {
+                const r = await classroom.courses.topics.get({
+                    courseId: args.courseId,
+                    id: args.id,
+                });
+                return ok(r.data);
+            }
             case 'classroom_list_topics': {
                 const r = await classroom.courses.topics.list({ courseId: args.courseId });
                 return ok(r.data.topic ?? []);
@@ -941,6 +991,13 @@ class GoogleClassroomServer {
                 return ok({ deleted: true, id: args.id });
             }
             // ── MATERIALS ──────────────────────────────────────────────────────
+            case 'classroom_get_material': {
+                const r = await classroom.courses.courseWorkMaterials.get({
+                    courseId: args.courseId,
+                    id: args.id,
+                });
+                return ok(r.data);
+            }
             case 'classroom_list_materials': {
                 const r = await classroom.courses.courseWorkMaterials.list({
                     courseId: args.courseId,
