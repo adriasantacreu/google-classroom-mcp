@@ -298,6 +298,7 @@ The server requests the following scopes during `node auth.js`:
 - **`drive.file` scope** only grants access to files created by this app. The `drive.readonly` scope (included by default) is needed to download student-uploaded submissions
 - **Guardian management** requires the Google Workspace admin to have enabled the guardian feature for the domain
 - **`classroom_add_student`** sends an enrollment *invitation* — the student must accept it; it does not enroll directly
+- **Rubrics API** requires **Google Workspace for Education Plus** or **Teaching and Learning Upgrade** license. Accounts on Education Fundamentals (free tier) will receive `UserIneligibleToModifyRubrics`. See [Google's rubrics limitations](https://developers.google.com/classroom/rubrics/limitations#license-requirements)
 
 ---
 
