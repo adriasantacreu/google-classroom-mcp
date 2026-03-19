@@ -1,7 +1,7 @@
 {
   "name": "google-classroom-mcp",
-  "version": "1.0.0",
-  "description": "Model Context Protocol server for comprehensive Google Classroom management",
+  "version": "2.0.0",
+  "description": "A Model Context Protocol (MCP) server for comprehensive Google Classroom management — built for AI-assisted teacher workflows",
   "type": "module",
   "bin": {
     "google-classroom-mcp": "./dist/index.js"
@@ -20,5 +20,18 @@
   "devDependencies": {
     "@types/node": "^20.14.9",
     "typescript": "^5.5.2"
+  },
+  "keywords": [
+    "mcp",
+    "google-classroom",
+    "education",
+    "ai",
+    "model-context-protocol",
+    "classroom-api"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/adriasantacreu/google-classroom-mcp.git"
   }
 }

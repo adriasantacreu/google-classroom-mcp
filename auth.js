@@ -22,6 +22,8 @@ const __dirname = path.dirname(__filename);
 const SCOPES = [
   'https://www.googleapis.com/auth/classroom.courses',
   'https://www.googleapis.com/auth/classroom.coursework.students',
+  'https://www.googleapis.com/auth/classroom.coursework.me',
+  'https://www.googleapis.com/auth/classroom.courseworkmaterials',
   'https://www.googleapis.com/auth/classroom.announcements',
   'https://www.googleapis.com/auth/classroom.rosters',
   'https://www.googleapis.com/auth/classroom.topics',
@@ -29,7 +31,7 @@ const SCOPES = [
   'https://www.googleapis.com/auth/classroom.profile.emails',
   'https://www.googleapis.com/auth/classroom.profile.photos',
   'https://www.googleapis.com/auth/drive.file',
-  'https://www.googleapis.com/auth/classroom.courseworkmaterials',
+  'https://www.googleapis.com/auth/drive.readonly', // per descarregar submissions d'alumnes
 ];
 
 const CREDENTIALS_PATH = path.join(__dirname, 'credentials.json');
