@@ -11,8 +11,6 @@ import dotenv from 'dotenv';
 dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-// NOTE: If classroom_grade_submission fails with permission errors,
-// delete token.json and re-run the auth flow — the classroom.grades scope was added.
 const SCOPES = [
     'https://www.googleapis.com/auth/classroom.courses',
     'https://www.googleapis.com/auth/classroom.coursework.students',
@@ -323,7 +321,7 @@ class GoogleClassroomServer {
             },
             {
                 name: 'classroom_grade_submission',
-                description: 'Grade a student submission (sets assignedGrade and draftGrade). Requires classroom.grades OAuth scope.',
+                description: 'Grade a student submission (sets assignedGrade and draftGrade).',
                 inputSchema: {
                     type: 'object',
                     properties: {

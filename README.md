@@ -275,9 +275,9 @@ The server requests the following scopes during `node auth.js`:
 
 ### User Profile
 
-| Tool | Required params | Description |
-|------|----------------|-------------|
-| `classroom_get_user_profile` | `userId` | Get profile by email or user ID |
+| Tool | Required params | Optional params | Description |
+|------|----------------|-----------------|-------------|
+| `classroom_get_user_profile` | `userId` | — | Get profile by email or user ID |
 
 ### Drive & File Attachments
 
@@ -351,7 +351,7 @@ node tests/test-integration.js
 ```
 google-classroom-mcp/
 ├── src/
-│   └── index.ts              # MCP server — all 43 tools (TypeScript source)
+│   └── index.ts              # MCP server — all 46 tools (TypeScript source)
 ├── dist/
 │   └── index.js              # Compiled output — point your MCP client here
 ├── tests/
