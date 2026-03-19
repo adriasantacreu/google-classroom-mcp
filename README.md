@@ -11,16 +11,16 @@ Complete Model Context Protocol (MCP) server for managing Google Classroom throu
 - **Grading Workflow**: List submissions and grade student work directly.
 - **Drive Integration**: Built-in file upload capability to support complex attachment workflows.
 
-## ??? Tools Included (25 Total)
+## 🛠️ Tools Included (25 Total)
 
-- classroom_list_courses: Filtered list of courses.
-- classroom_search_courses: Find courses by name/regex.
-- classroom_create_assignment: Parametric task creation with multi-attachment support.
-- classroom_patch_assignment: Targeted updates using updateMask.
-- drive_upload_file: Base64 upload to Google Drive.
+- `classroom_list_courses`: Filtered list of courses.
+- `classroom_search_courses`: Find courses by name/regex.
+- `classroom_create_assignment`: Parametric task creation with multi-attachment support.
+- `classroom_patch_assignment`: Targeted updates using `updateMask`.
+- `drive_upload_file`: Base64 upload to Google Drive.
 - ... and 20 more.
 
-## ?? Validated in Production
+## 🧪 Validated in Production
 
 This server has been strictly tested with production Google Classroom data, validating:
 1. OAuth2 Authentication flow.
@@ -32,7 +32,6 @@ This server has been strictly tested with production Google Classroom data, vali
 
 1. Create a project in [Google Cloud Console](https://console.cloud.google.com).
 2. Enable Classroom and Drive APIs.
-3. Download credentials.json (Desktop App).
-4. Run 
-ode auth.js to generate 	oken.json.
+3. Download `credentials.json` (Desktop App).
+4. Run `node auth.js` to generate `token.json`.
 5. Configure your MCP client (e.g., Claude Desktop).
