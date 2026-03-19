@@ -40,6 +40,7 @@ class GoogleClassroomServer {
   private server: Server;
   private classroom?: classroom_v1.Classroom;
   private drive?: drive_v3.Drive;
+  private auth?: OAuth2Client;
 
   constructor() {
     this.server = new Server(
@@ -73,10 +74,22 @@ class GoogleClassroomServer {
   private async initApis() {
     if (!this.classroom || !this.drive) {
       const auth = await this.getAuthClient();
+      this.auth = auth;
       this.classroom = google.classroom({ version: 'v1', auth });
       this.drive = google.drive({ version: 'v3', auth });
     }
     return { classroom: this.classroom!, drive: this.drive! };
+  }
+
+  // Direct HTTP helper for API endpoints not exposed by the googleapis SDK (e.g. rubrics)
+  private async classroomRequest(
+    method: 'GET' | 'POST' | 'PATCH' | 'DELETE' | 'PUT',
+    path: string,
+    body?: any
+  ) {
+    const url = `https://classroom.googleapis.com/v1${path}`;
+    const r = await this.auth!.request({ url, method, data: body });
+    return r.data as any;
   }
 
   private setupHandlers() {
@@ -1195,38 +1208,30 @@ class GoogleClassroomServer {
         return ok(r.data);
       }
 
-      // ── RUBRICS ────────────────────────────────────────────────────────
+      // ── RUBRICS (direct HTTP — googleapis SDK does not expose rubrics resource) ──
       case 'classroom_list_rubrics': {
-        const rubrics = (classroom.courses.courseWork as any).rubrics;
-        const r = await rubrics.list({ courseId: args.courseId, courseWorkId: args.courseWorkId });
-        return ok(r.data.rubrics ?? []);
+        const data = await this.classroomRequest('GET',
+          `/courses/${args.courseId}/courseWork/${args.courseWorkId}/rubrics`);
+        return ok(data.rubrics ?? []);
       }
 
       case 'classroom_create_rubric': {
-        const rubrics = (classroom.courses.courseWork as any).rubrics;
-        const r = await rubrics.create({
-          courseId: args.courseId,
-          courseWorkId: args.courseWorkId,
-          requestBody: { criteria: args.criteria },
-        });
-        return ok(r.data);
+        const data = await this.classroomRequest('POST',
+          `/courses/${args.courseId}/courseWork/${args.courseWorkId}/rubrics`,
+          { criteria: args.criteria });
+        return ok(data);
       }
 
       case 'classroom_patch_rubric': {
-        const rubrics = (classroom.courses.courseWork as any).rubrics;
-        const r = await rubrics.patch({
-          courseId: args.courseId,
-          courseWorkId: args.courseWorkId,
-          id: args.id,
-          updateMask: 'criteria',
-          requestBody: { criteria: args.criteria },
-        });
-        return ok(r.data);
+        const data = await this.classroomRequest('PATCH',
+          `/courses/${args.courseId}/courseWork/${args.courseWorkId}/rubrics/${args.id}?updateMask=criteria`,
+          { criteria: args.criteria });
+        return ok(data);
       }
 
       case 'classroom_delete_rubric': {
-        const rubrics = (classroom.courses.courseWork as any).rubrics;
-        await rubrics.delete({ courseId: args.courseId, courseWorkId: args.courseWorkId, id: args.id });
+        await this.classroomRequest('DELETE',
+          `/courses/${args.courseId}/courseWork/${args.courseWorkId}/rubrics/${args.id}`);
         return ok({ deleted: true, id: args.id });
       }
 
