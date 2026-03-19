@@ -1,63 +1,69 @@
 # Google Classroom MCP Server
 
-A Model Context Protocol (MCP) server that provides AI agents with full access to the Google Classroom API. Built to enable complex automation workflows for educators — from bulk assignment creation to submission review and grading — as part of AI-driven productivity integrations.
+![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue?logo=typescript)
+![Node.js](https://img.shields.io/badge/Node.js-18%2B-green?logo=node.js)
+![License](https://img.shields.io/badge/license-MIT-brightgreen)
+![MCP](https://img.shields.io/badge/MCP-compatible-purple)
+![Tools](https://img.shields.io/badge/tools-43-orange)
+
+A [Model Context Protocol](https://modelcontextprotocol.io) (MCP) server that gives AI agents full programmatic access to Google Classroom. Built to enable complex, multi-step automation workflows for educators: from bulk assignment creation and roster management to submission collection, grading, and Drive file delivery.
 
 ## Why This Exists
 
-Modern AI agents need structured access to educational platforms to be genuinely useful in teaching workflows. This server was created out of the need to integrate AI assistants into real classroom management: automating repetitive tasks, orchestrating multi-step flows (create topic → assign work → collect submissions → grade), and allowing LLM-based tools to act as a reliable assistant for teachers.
+AI agents need structured, reliable access to educational platforms to be genuinely useful in teaching workflows. This server was born from the need to integrate AI assistants into real classroom management — automating repetitive tasks, orchestrating multi-step flows (create topic → assign work → collect submissions → grade), and letting LLM-based tools act as a capable assistant for teachers.
 
 ## Features
 
-- **43 fully implemented tools** covering courses, assignments, materials, announcements, topics, submissions, grading, rosters, guardians, rubrics, and Drive file management
-- **Google Drive integration** — upload files and attach them to assignments; download student submission PDFs
-- **Compact responses by default** — list operations return only essential fields to stay within MCP token limits; use `fullData: true` when you need complete objects
+- **43 fully implemented tools** — courses, topics, assignments, materials, announcements, submissions, grading, rosters, guardians, rubrics, and Drive file management
+- **Google Drive integration** — upload files to Drive and attach them to assignments; download student submission PDFs
+- **Compact responses by default** — list operations return only essential fields to stay within MCP token limits; pass `fullData: true` for complete objects
 - **OAuth2 authentication** with persistent token storage and automatic refresh
+- **Environment variable overrides** for `credentials.json` and `token.json` paths
 
-## Requirements
+---
+
+## Installation
+
+### Prerequisites
 
 - Node.js 18+
+- A Google account with Google Classroom access (teacher role)
 - A Google Cloud project with the Classroom API enabled
-- OAuth2 credentials (Desktop app type)
-- A Google account with Google Classroom access (teacher role recommended)
 
-## Setup
-
-### 1. Enable APIs and Create Credentials
+### Step 1 — Clone and build
 
 ```bash
-# Enable Classroom API
-gcloud services enable classroom.googleapis.com
-
-# Or enable it in the Google Cloud Console:
-# APIs & Services -> Library -> Google Classroom API -> Enable
-```
-
-In the [Google Cloud Console](https://console.cloud.google.com):
-1. Go to **APIs & Services -> Credentials**
-2. Click **Create Credentials -> OAuth client ID**
-3. Application type: **Desktop app**
-4. Download the JSON file and save it as `credentials.json` in the project root
-
-### 2. Install and Build
-
-```bash
-git clone https://github.com/your-username/google-classroom-mcp
+git clone https://github.com/adriasantacreu/google-classroom-mcp.git
 cd google-classroom-mcp
 npm install
 npm run build
 ```
 
-### 3. Authenticate
+### Step 2 — Create Google OAuth credentials
+
+1. Go to [console.cloud.google.com](https://console.cloud.google.com)
+2. Enable the Classroom API: **APIs & Services > Library > Google Classroom API > Enable**
+3. Go to **APIs & Services > Credentials > Create Credentials > OAuth client ID**
+4. Application type: **Desktop app**
+5. Download the JSON and save it as `credentials.json` in the project root
+
+### Step 3 — Authenticate
 
 ```bash
 node auth.js
 ```
 
-Follow the printed instructions: open the URL, authorize the app, paste the code. A `token.json` file will be created.
+Open the printed URL in your browser, authorize the app, paste the code. A `token.json` file is created and stored locally.
 
-### 4. Configure Your MCP Client
+---
 
-Add this to your MCP client configuration (e.g., Claude Desktop `claude_desktop_config.json`):
+## Configure Your MCP Client
+
+Pick your client and add the server configuration. Replace `/absolute/path/to/google-classroom-mcp` with the actual path on your system.
+
+### Claude Desktop
+
+Edit `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) or `%APPDATA%\Claude\claude_desktop_config.json` (Windows):
 
 ```json
 {
@@ -70,11 +76,80 @@ Add this to your MCP client configuration (e.g., Claude Desktop `claude_desktop_
 }
 ```
 
-Restart your MCP client after adding the configuration.
+### Cursor
+
+Edit `~/.cursor/mcp.json` (global) or `.cursor/mcp.json` (per project):
+
+```json
+{
+  "mcpServers": {
+    "google-classroom": {
+      "command": "node",
+      "args": ["/absolute/path/to/google-classroom-mcp/dist/index.js"]
+    }
+  }
+}
+```
+
+### VS Code (with GitHub Copilot)
+
+Edit your user `settings.json` or `.vscode/mcp.json`:
+
+```json
+{
+  "mcp": {
+    "servers": {
+      "google-classroom": {
+        "type": "stdio",
+        "command": "node",
+        "args": ["/absolute/path/to/google-classroom-mcp/dist/index.js"]
+      }
+    }
+  }
+}
+```
+
+### Windsurf
+
+Edit `~/.codeium/windsurf/mcp_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "google-classroom": {
+      "command": "node",
+      "args": ["/absolute/path/to/google-classroom-mcp/dist/index.js"]
+    }
+  }
+}
+```
+
+### Custom paths (optional)
+
+If your `credentials.json` or `token.json` are not in the project root, use environment variables:
+
+```json
+{
+  "mcpServers": {
+    "google-classroom": {
+      "command": "node",
+      "args": ["/absolute/path/to/google-classroom-mcp/dist/index.js"],
+      "env": {
+        "GOOGLE_CREDENTIALS_PATH": "/path/to/credentials.json",
+        "GOOGLE_TOKEN_PATH": "/path/to/token.json"
+      }
+    }
+  }
+}
+```
+
+Restart your MCP client after editing the config.
+
+---
 
 ## OAuth Scopes
 
-The server requests the following scopes:
+The server requests the following scopes during `node auth.js`:
 
 | Scope | Purpose |
 |-------|---------|
@@ -86,176 +161,215 @@ The server requests the following scopes:
 | `classroom.rosters` | Manage students and teachers |
 | `classroom.topics` | Manage course topics |
 | `classroom.guardianlinks.students` | Manage student guardians |
-| `classroom.profile.emails` | Read user emails |
+| `classroom.profile.emails` | Read user email addresses |
 | `classroom.profile.photos` | Read user profile photos |
-| `drive.file` | Upload files via Drive |
-| `drive.readonly` | Download student submission files |
+| `drive.file` | Upload files to Drive |
+| `drive.readonly` | Download student-uploaded submission files |
+
+---
 
 ## Tool Reference
 
 ### Courses
 
-| Tool | Description |
-|------|-------------|
-| `classroom_list_courses` | List all courses (teacher/student). Supports `fullData`, `teacherId`, `studentId`, `courseStates` filters |
-| `classroom_get_course` | Get a single course by ID |
-| `classroom_search_courses` | Search courses by name (case-insensitive substring match) |
-| `classroom_create_course` | Create a new course |
-| `classroom_update_course` | Update course fields (name, section, description, room, state) |
-| `classroom_delete_course` | Delete a course (must be ARCHIVED first) |
+| Tool | Required params | Optional params | Description |
+|------|----------------|-----------------|-------------|
+| `classroom_list_courses` | — | `courseStates`, `pageSize`, `pageToken`, `fullData` | List all courses. `courseStates`: ACTIVE, ARCHIVED, PROVISIONED |
+| `classroom_search_courses` | `query` | — | Search courses by name or section (case-insensitive) |
+| `classroom_get_course` | `courseId` | — | Get full details of a single course |
+| `classroom_create_course` | `name` | `section`, `description`, `room`, `ownerId` | Create a new course |
+| `classroom_update_course` | `courseId` | `name`, `section`, `description`, `room`, `state` | Update course fields. `state`: ACTIVE, ARCHIVED |
+| `classroom_delete_course` | `courseId` | — | Archive then delete a course |
 
 ### Topics
 
-| Tool | Description |
-|------|-------------|
-| `classroom_list_topics` | List all topics in a course |
-| `classroom_create_topic` | Create a new topic |
-| `classroom_update_topic` | Rename a topic |
-| `classroom_delete_topic` | Delete a topic |
+| Tool | Required params | Optional params | Description |
+|------|----------------|-----------------|-------------|
+| `classroom_list_topics` | `courseId` | — | List all topics in a course |
+| `classroom_create_topic` | `courseId`, `name` | — | Create a new topic/unit |
+| `classroom_patch_topic` | `courseId`, `id`, `name` | — | Rename a topic |
+| `classroom_delete_topic` | `courseId`, `id` | — | Delete a topic |
 
-### Assignments (CourseWork)
+### Assignments
 
-| Tool | Description |
-|------|-------------|
-| `classroom_list_assignments` | List assignments. Supports `courseWorkStates`, `fullData`, `pageSize` |
-| `classroom_get_assignment` | Get a single assignment by ID |
-| `classroom_create_assignment` | Create an assignment with optional due date, points, topic, attachments |
-| `classroom_patch_assignment` | Update assignment fields (title, description, points, topic, due date) |
-| `classroom_delete_assignment` | Delete an assignment |
-| `classroom_move_assignment_to_topic` | Move an assignment to a different topic |
+| Tool | Required params | Optional params | Description |
+|------|----------------|-----------------|-------------|
+| `classroom_list_assignments` | `courseId` | `courseWorkStates`, `pageSize`, `pageToken` | List assignments. `courseWorkStates`: PUBLISHED, DRAFT |
+| `classroom_create_assignment` | `courseId`, `title` | `description`, `workType`, `state`, `maxPoints`, `dueDate` (YYYY-MM-DD), `dueTime` (HH:MM), `topicId`, `attachments` | Create assignment or question |
+| `classroom_patch_assignment` | `courseId`, `id`, `updateMask` | `title`, `description`, `maxPoints`, `topicId`, `dueDate`, `dueTime`, `state` | Partial update via updateMask |
+| `classroom_update_assignment` | `courseId`, `id` | `title`, `description`, `maxPoints`, `dueDate`, `dueTime`, `topicId`, `state` | Full update of all mutable fields |
+| `classroom_delete_assignment` | `courseId`, `id` | — | Permanently delete an assignment |
+| `classroom_move_to_topic` | `courseId`, `id`, `topicId` | — | Move assignment to a topic. Pass `""` to unassign |
+
+**Attachment format** (for `classroom_create_assignment`):
+```json
+"attachments": [
+  { "type": "driveFile", "idOrUrl": "<drive-file-id>" },
+  { "type": "link",      "idOrUrl": "https://example.com" },
+  { "type": "youtubeVideo", "idOrUrl": "<video-id>" },
+  { "type": "form",     "idOrUrl": "https://forms.gle/..." }
+]
+```
 
 ### Materials
 
-| Tool | Description |
-|------|-------------|
-| `classroom_list_materials` | List course materials |
-| `classroom_get_material` | Get a single material by ID |
-| `classroom_create_material` | Create a material with optional topic and attachments |
-| `classroom_delete_material` | Delete a material |
-
-**Note:** Google Classroom does not support editing materials after creation (API limitation).
+| Tool | Required params | Optional params | Description |
+|------|----------------|-----------------|-------------|
+| `classroom_list_materials` | `courseId` | `pageSize` | List all non-graded materials |
+| `classroom_create_material` | `courseId`, `title` | `description`, `topicId`, `attachments` | Create a material post |
+| `classroom_patch_material` | `courseId`, `id`, `updateMask` | `title`, `description`, `topicId`, `state` | Update material fields |
+| `classroom_delete_material` | `courseId`, `id` | — | Delete a material |
 
 ### Announcements
 
-| Tool | Description |
-|------|-------------|
-| `classroom_list_announcements` | List announcements |
-| `classroom_post_announcement` | Post a new announcement |
-| `classroom_patch_announcement` | Update announcement text |
-| `classroom_delete_announcement` | Delete an announcement |
+| Tool | Required params | Optional params | Description |
+|------|----------------|-----------------|-------------|
+| `classroom_list_announcements` | `courseId` | `pageSize` | List announcements |
+| `classroom_post_announcement` | `courseId`, `text` | — | Post to the course stream |
+| `classroom_patch_announcement` | `courseId`, `id`, `text` | — | Edit announcement text |
+| `classroom_delete_announcement` | `courseId`, `id` | — | Delete an announcement |
 
 ### Submissions
 
-| Tool | Description |
-|------|-------------|
-| `classroom_list_submissions` | List submissions. Use `courseWorkId: "-"` for all submissions in a course. Supports `userId` filter |
-| `classroom_get_submission` | Get a single submission |
-| `classroom_grade_submission` | Set a grade (draftGrade and assignedGrade) on a submission |
-| `classroom_return_submission` | Return a submission to the student |
-| `classroom_download_submission` | Download a student submission file from Drive (returns base64) |
+| Tool | Required params | Optional params | Description |
+|------|----------------|-----------------|-------------|
+| `classroom_list_submissions` | `courseId`, `courseWorkId` | `states`, `pageSize` | List submissions. Use `"-"` as `courseWorkId` to get all submissions in a course. `states`: NEW, CREATED, TURNED_IN, RETURNED |
+| `classroom_grade_submission` | `courseId`, `courseWorkId`, `id`, `grade` | `draft` | Set a grade. `draft: true` sets only draftGrade |
+| `classroom_return_submission` | `courseId`, `courseWorkId`, `id` | — | Return a graded submission to the student |
 
-### Rosters
+### Rosters — Students
 
-| Tool | Description |
-|------|-------------|
-| `classroom_list_students` | List students enrolled in a course |
-| `classroom_add_student` | Invite a student to a course by email (sends invitation) |
-| `classroom_remove_student` | Remove a student from a course |
-| `classroom_list_teachers` | List teachers in a course |
-| `classroom_add_teacher` | Invite a teacher to a course by email |
-| `classroom_remove_teacher` | Remove a teacher from a course |
+| Tool | Required params | Optional params | Description |
+|------|----------------|-----------------|-------------|
+| `classroom_list_students` | `courseId` | `pageSize` | List enrolled students |
+| `classroom_add_student` | `courseId`, `email` | — | Invite a student by email (sends an invitation) |
+| `classroom_delete_student` | `courseId`, `userId` | — | Remove a student. `userId`: email or user ID |
+
+### Rosters — Teachers
+
+| Tool | Required params | Optional params | Description |
+|------|----------------|-----------------|-------------|
+| `classroom_list_teachers` | `courseId` | — | List co-instructors |
+| `classroom_invite_teacher` | `courseId`, `email` | — | Invite a co-teacher by email |
+| `classroom_delete_teacher` | `courseId`, `userId` | — | Remove a teacher |
 
 ### Guardians
 
-| Tool | Description |
-|------|-------------|
-| `classroom_list_guardians` | List guardians for a student |
-| `classroom_invite_guardian` | Send a guardian invitation |
-| `classroom_delete_guardian` | Remove a guardian |
+| Tool | Required params | Optional params | Description |
+|------|----------------|-----------------|-------------|
+| `classroom_list_guardians` | `studentId` | — | List guardians for a student |
+| `classroom_invite_guardian` | `studentId`, `guardianEmail` | — | Send a guardian invitation |
+| `classroom_delete_guardian` | `studentId`, `guardianId` | — | Remove a guardian |
 
 ### Rubrics
 
-| Tool | Description |
-|------|-------------|
-| `classroom_list_rubrics` | List rubrics for an assignment |
-| `classroom_get_rubric` | Get a rubric by ID |
-| `classroom_create_rubric` | Create a rubric with criteria and levels |
-| `classroom_update_rubric` | Update rubric criteria |
-| `classroom_delete_rubric` | Delete a rubric |
+| Tool | Required params | Optional params | Description |
+|------|----------------|-----------------|-------------|
+| `classroom_list_rubrics` | `courseId`, `courseWorkId` | — | List rubrics for an assignment |
+| `classroom_create_rubric` | `courseId`, `courseWorkId`, `criteria` | — | Create a rubric with criteria array |
+| `classroom_patch_rubric` | `courseId`, `courseWorkId`, `id`, `criteria` | — | Update rubric criteria |
+| `classroom_delete_rubric` | `courseId`, `courseWorkId`, `id` | — | Delete a rubric |
 
 ### User Profile
 
-| Tool | Description |
-|------|-------------|
-| `classroom_get_user_profile` | Get a user profile by email or user ID |
+| Tool | Required params | Description |
+|------|----------------|-------------|
+| `classroom_get_user_profile` | `userId` | Get profile by email or user ID |
 
-### Invitations
+### Drive & File Attachments
 
-| Tool | Description |
-|------|-------------|
-| `classroom_list_invitations` | List pending invitations |
-| `classroom_delete_invitation` | Cancel a pending invitation |
+| Tool | Required params | Optional params | Description |
+|------|----------------|-----------------|-------------|
+| `drive_upload_file` | `name`, `base64Content` | `mimeType` | Upload a base64-encoded file to Drive. Returns file ID and URL |
+| `classroom_upload_to_classroom` | `courseId`, `title`, `fileName`, `base64Content` | `description`, `topicId`, `mimeType` | Upload file to Drive and attach it as a material in one step |
 
-### Drive
-
-| Tool | Description |
-|------|-------------|
-| `drive_upload_file` | Upload a file to Google Drive and return its file ID |
-| `classroom_upload_to_classroom` | Upload a file to Drive and immediately attach it to an assignment |
+---
 
 ## Known API Limitations
 
-- **Course deletion** requires the course to be in `ARCHIVED` state first
-- **Materials cannot be edited** after creation — the Classroom API does not expose a patch endpoint for materials
+- **Course deletion** requires the course to be `ARCHIVED` first — the tool handles this automatically
+- **Materials cannot be edited** after creation — the Classroom API does not provide a PATCH endpoint for materials; `classroom_patch_material` is declared but will be rejected by the API for most fields
 - **Assignment `workType`** (ASSIGNMENT, SHORT_ANSWER_QUESTION, MULTIPLE_CHOICE_QUESTION) cannot be changed after creation
-- **Assignment `state`** can only be changed to `PUBLISHED`, not back to `DRAFT`
-- **`drive.file` scope** only allows downloading files created by the app. Use `drive.readonly` (included in default scopes) to download student-uploaded submissions
-- **Submission grading** may return `ProjectPermissionDenied` if the authenticated user does not have grading rights on that course
+- **Assignment `state`** can only be moved to `PUBLISHED` — reverting to DRAFT is not supported by the API
+- **Assignment attachments** cannot be modified after creation — this is an API restriction
+- **`drive.file` scope** only grants access to files created by this app. The `drive.readonly` scope (included by default) is needed to download student-uploaded submissions
+- **Guardian management** requires the Google Workspace admin to have enabled the guardian feature for the domain
+- **`classroom_add_student`** sends an enrollment *invitation* — the student must accept it; it does not enroll directly
 
-## Re-authenticating
+---
 
-If you add or change scopes, delete `token.json` and run `node auth.js` again:
+## Troubleshooting
 
-```bash
-rm token.json
-node auth.js
-```
+**`Authentication token not found. Run auth flow first.`**
+Run `node auth.js` and complete the OAuth flow. A `token.json` file must exist before starting the server.
+
+**`Token expired or invalid`**
+Delete `token.json` and run `node auth.js` again to re-authenticate.
+
+**`Some requested scopes were invalid`**
+Your token was generated with an outdated scope list. Delete `token.json` and re-run `node auth.js`.
+
+**`ProjectPermissionDenied` when grading**
+The authenticated account does not have permission to grade in that course. Verify you are the course owner or a co-teacher.
+
+**`UserInIllegalDomain` when adding a student**
+The invited email belongs to a domain not allowed by your Google Workspace policy. This is a domain-level restriction, not an API bug.
+
+**List responses truncated or missing fields**
+By default, list tools return compact fields to stay within MCP token limits. Pass `fullData: true` to get the complete API response.
+
+**MCP server not loading in client**
+- Verify the path in your config points to `dist/index.js`, not `src/index.ts`
+- Make sure you ran `npm run build` after any source changes
+- Restart the MCP client after config changes
+
+---
 
 ## Running Tests
 
-Tests require a real Google Classroom course and will create and delete data.
+Tests run against a real Google Classroom course and will create and delete live data.
 
 ```bash
-# Set your course ID
+# Set your test course ID
 export TEST_COURSE_ID=your_course_id_here
 
-# Basic functional tests (one tool at a time)
+# Functional tests — one tool at a time, with cleanup
 node tests/test-basic.js
 
-# Integration tests (cross-tool workflows)
+# Integration tests — cross-tool workflows and data consistency
 node tests/test-integration.js
 ```
+
+---
 
 ## Project Structure
 
 ```
 google-classroom-mcp/
 ├── src/
-│   └── index.ts          # MCP server -- all 43 tools
+│   └── index.ts              # MCP server — all 43 tools (TypeScript source)
 ├── dist/
-│   └── index.js          # Compiled output (run this)
+│   └── index.js              # Compiled output — point your MCP client here
 ├── tests/
-│   ├── test-basic.js     # Functional tests for all tools
-│   └── test-integration.js # Cross-tool workflow tests
-├── auth.js               # OAuth2 token generator
-├── credentials.json      # Your OAuth credentials (not committed)
-├── token.json            # Generated auth token (not committed)
+│   ├── test-basic.js         # Functional tests for each tool individually
+│   └── test-integration.js   # Cross-tool workflow and consistency tests
+├── auth.js                   # OAuth2 token generator
+├── smithery.yaml             # Smithery marketplace config
+├── credentials.json          # Your OAuth credentials (git-ignored)
+├── token.json                # Generated auth token (git-ignored)
 └── package.json
 ```
 
+---
+
 ## Contributing
 
-Issues and pull requests are welcome. When adding new tools, follow the existing pattern: declare the tool in `getTools()`, add a `case` in `handleToolCall()`, and write a test in `tests/test-basic.js`.
+Issues and pull requests are welcome. When adding new tools:
+1. Declare the tool in `getTools()` with a complete `inputSchema`
+2. Add a matching `case` in `handleToolCall()`
+3. Add a test in `tests/test-basic.js`
+
+Follow the existing patterns for compact/fullData responses and error handling.
 
 ## License
 
