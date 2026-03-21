@@ -1,5 +1,11 @@
 # Google Classroom MCP Server
 
+<p align="left">
+  <img src="https://raw.githubusercontent.com/lobehub/lobe-icons/refs/heads/master/packages/static-svg/icons/mcp.svg" height="40" alt="MCP" />
+  &nbsp;&nbsp;
+  <img src="https://www.gstatic.com/classroom/logo_square_rounded.svg" height="40" alt="Google Classroom" />
+</p>
+
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue?logo=typescript)
 ![Node.js](https://img.shields.io/badge/Node.js-18%2B-green?logo=node.js)
 ![License](https://img.shields.io/badge/license-MIT-brightgreen)
