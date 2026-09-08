@@ -174,6 +174,14 @@ The server requests the following scopes during `node auth.js`:
 
 ---
 
+## Post-list pagination
+
+Assignment, material, announcement and topic lists follow `nextPageToken` until all matching results have been collected. Responses remain arrays. For these tools, `pageSize` controls the size of each API request, not the total number of returned items. Assignment lists can still start from an explicit `pageToken`.
+
+Default publication-state filtering is unchanged. To include drafts, pass `courseWorkStates`, `courseWorkMaterialStates` or `announcementStates` with `["PUBLISHED", "DRAFT"]` to the corresponding list tool.
+
+Run `npm run build && node tests/test-pagination.js` for offline pagination regression checks. These checks do not read credentials or call Google APIs.
+
 ## Tool Reference
 
 ### Courses

@@ -426,6 +426,7 @@ class GoogleClassroomServer {
                     type: 'object',
                     properties: {
                         courseId: { type: 'string' },
+                        courseWorkMaterialStates: { type: 'array', items: { type: 'string', enum: ['PUBLISHED', 'DRAFT', 'DELETED'] } },
                         pageSize: { type: 'number', default: 50 },
                     },
                     required: ['courseId'],
@@ -492,6 +493,7 @@ class GoogleClassroomServer {
                     type: 'object',
                     properties: {
                         courseId: { type: 'string' },
+                        announcementStates: { type: 'array', items: { type: 'string', enum: ['PUBLISHED', 'DRAFT', 'DELETED'] } },
                         pageSize: { type: 'number', default: 50 },
                     },
                     required: ['courseId'],
@@ -837,16 +839,22 @@ class GoogleClassroomServer {
                 return ok(r.data);
             }
             case 'classroom_list_assignments': {
-                const r = await classroom.courses.courseWork.list({
-                    courseId: args.courseId,
-                    courseWorkStates: args.courseWorkStates,
-                    pageSize: args.pageSize ?? 50,
-                    pageToken: args.pageToken,
-                    fields: args.fullData
-                        ? undefined
-                        : 'courseWork(id,title,workType,state,maxPoints,dueDate,dueTime,topicId,creationTime,updateTime),nextPageToken',
-                });
-                return ok(r.data.courseWork ?? []);
+                const items = [];
+                let pageToken = args.pageToken;
+                do {
+                    const r = await classroom.courses.courseWork.list({
+                        courseId: args.courseId,
+                        courseWorkStates: args.courseWorkStates,
+                        pageSize: args.pageSize ?? 50,
+                        pageToken,
+                        fields: args.fullData
+                            ? undefined
+                            : 'courseWork(id,title,workType,state,maxPoints,dueDate,dueTime,topicId,creationTime,updateTime),nextPageToken',
+                    });
+                    items.push(...(r.data.courseWork ?? []));
+                    pageToken = r.data.nextPageToken;
+                } while (pageToken);
+                return ok(items);
             }
             case 'classroom_create_assignment': {
                 const body = {
@@ -970,8 +978,14 @@ class GoogleClassroomServer {
                 return ok(r.data);
             }
             case 'classroom_list_topics': {
-                const r = await classroom.courses.topics.list({ courseId: args.courseId });
-                return ok(r.data.topic ?? []);
+                const items = [];
+                let pageToken = args.pageToken;
+                do {
+                    const r = await classroom.courses.topics.list({ courseId: args.courseId, pageToken });
+                    items.push(...(r.data.topic ?? []));
+                    pageToken = r.data.nextPageToken;
+                } while (pageToken);
+                return ok(items);
             }
             case 'classroom_create_topic': {
                 const r = await classroom.courses.topics.create({
@@ -1005,14 +1019,22 @@ class GoogleClassroomServer {
                 return ok(r.data);
             }
             case 'classroom_list_materials': {
-                const r = await classroom.courses.courseWorkMaterials.list({
-                    courseId: args.courseId,
-                    pageSize: args.pageSize ?? 50,
-                    fields: args.fullData
-                        ? undefined
-                        : 'courseWorkMaterial(id,title,description,topicId,state,creationTime,updateTime)',
-                });
-                return ok(r.data.courseWorkMaterial ?? []);
+                const items = [];
+                let pageToken = args.pageToken;
+                do {
+                    const r = await classroom.courses.courseWorkMaterials.list({
+                        courseId: args.courseId,
+                        courseWorkMaterialStates: args.courseWorkMaterialStates,
+                        pageToken,
+                        pageSize: args.pageSize ?? 50,
+                        fields: args.fullData
+                            ? undefined
+                            : 'courseWorkMaterial(id,title,description,topicId,state,creationTime,updateTime),nextPageToken',
+                    });
+                    items.push(...(r.data.courseWorkMaterial ?? []));
+                    pageToken = r.data.nextPageToken;
+                } while (pageToken);
+                return ok(items);
             }
             case 'classroom_create_material': {
                 const body = {
@@ -1057,14 +1079,22 @@ class GoogleClassroomServer {
             }
             // ── ANNOUNCEMENTS ──────────────────────────────────────────────────
             case 'classroom_list_announcements': {
-                const r = await classroom.courses.announcements.list({
-                    courseId: args.courseId,
-                    pageSize: args.pageSize ?? 50,
-                    fields: args.fullData
-                        ? undefined
-                        : 'announcements(id,text,state,creationTime,updateTime)',
-                });
-                return ok(r.data.announcements ?? []);
+                const items = [];
+                let pageToken = args.pageToken;
+                do {
+                    const r = await classroom.courses.announcements.list({
+                        courseId: args.courseId,
+                        pageToken,
+                        announcementStates: args.announcementStates,
+                        pageSize: args.pageSize ?? 50,
+                        fields: args.fullData
+                            ? undefined
+                            : 'announcements(id,text,state,creationTime,updateTime),nextPageToken',
+                    });
+                    items.push(...(r.data.announcements ?? []));
+                    pageToken = r.data.nextPageToken;
+                } while (pageToken);
+                return ok(items);
             }
             case 'classroom_post_announcement': {
                 const r = await classroom.courses.announcements.create({
