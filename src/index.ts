@@ -123,12 +123,16 @@ class GoogleClassroomServer {
 
   // ─── HELPER: parse "YYYY-MM-DD" and optional "HH:MM" into API date/time ───
   private parseDueDateTime(dueDate?: string, dueTime?: string) {
+    // Hora de Catalunya (Europe/Madrid) → UTC, que és el que vol l'API de Classroom
     if (!dueDate) return {};
-    const [year, month, day] = dueDate.split('-').map(Number);
-    const [hours, minutes] = (dueTime || '23:59').split(':').map(Number);
+    const [y, m, d] = dueDate.split('-').map(Number);
+    const [h, min] = (dueTime || '23:59').split(':').map(Number);
+    const prova = new Date(Date.UTC(y, m - 1, d, h, min));
+    const zona = (tz: string) => new Date(prova.toLocaleString('en-US', { timeZone: tz })).getTime();
+    const utc = new Date(prova.getTime() - (zona('Europe/Madrid') - zona('UTC')));
     return {
-      dueDate: { year, month, day },
-      dueTime: { hours, minutes, seconds: 0, nanos: 0 },
+      dueDate: { year: utc.getUTCFullYear(), month: utc.getUTCMonth() + 1, day: utc.getUTCDate() },
+      dueTime: { hours: utc.getUTCHours(), minutes: utc.getUTCMinutes(), seconds: 0, nanos: 0 },
     };
   }
 
@@ -249,9 +253,10 @@ class GoogleClassroomServer {
             description: { type: 'string' },
             workType: { type: 'string', enum: ['ASSIGNMENT', 'SHORT_ANSWER_QUESTION', 'MULTIPLE_CHOICE_QUESTION'], default: 'ASSIGNMENT' },
             state: { type: 'string', enum: ['PUBLISHED', 'DRAFT'], default: 'PUBLISHED' },
+            scheduledTime: { type: 'string', description: 'RFC3339 with offset (e.g. 2026-09-30T09:00:00+02:00). Schedules automatic publication at that time (posts as DRAFT + scheduledTime).' },
             maxPoints: { type: 'number' },
             dueDate: { type: 'string', description: 'YYYY-MM-DD' },
-            dueTime: { type: 'string', description: 'HH:MM (defaults to 23:59 if dueDate is set)' },
+            dueTime: { type: 'string', description: 'HH:MM, Catalan local time (Europe/Madrid); defaults to 23:59' },
             topicId: { type: 'string' },
             attachments: {
               type: 'array',
@@ -281,7 +286,7 @@ class GoogleClassroomServer {
             maxPoints: { type: 'number' },
             topicId: { type: 'string' },
             dueDate: { type: 'string', description: 'YYYY-MM-DD' },
-            dueTime: { type: 'string', description: 'HH:MM' },
+            dueTime: { type: 'string', description: 'HH:MM, Catalan local time (Europe/Madrid)' },
             state: { type: 'string', enum: ['PUBLISHED', 'DRAFT'] },
           },
           required: ['courseId', 'id', 'updateMask'],
@@ -301,7 +306,7 @@ class GoogleClassroomServer {
             state: { type: 'string', enum: ['PUBLISHED', 'DRAFT'] },
             maxPoints: { type: 'number' },
             dueDate: { type: 'string', description: 'YYYY-MM-DD' },
-            dueTime: { type: 'string', description: 'HH:MM' },
+            dueTime: { type: 'string', description: 'HH:MM, Catalan local time (Europe/Madrid)' },
             topicId: { type: 'string' },
           },
           required: ['courseId', 'id'],
@@ -464,7 +469,7 @@ class GoogleClassroomServer {
       },
       {
         name: 'classroom_create_material',
-        description: 'Create a study material post with optional attachments and topic.',
+        description: 'Create a study material post with optional attachments and topic. Use scheduledTime to publish later.',
         inputSchema: {
           type: 'object',
           properties: {
@@ -472,6 +477,7 @@ class GoogleClassroomServer {
             title: { type: 'string' },
             description: { type: 'string' },
             topicId: { type: 'string' },
+            scheduledTime: { type: 'string', description: 'RFC3339 with offset (e.g. 2026-09-30T09:00:00+02:00). Schedules automatic publication at that time (posts as DRAFT + scheduledTime).' },
             attachments: {
               type: 'array',
               items: {
@@ -894,7 +900,8 @@ class GoogleClassroomServer {
           title: args.title,
           description: args.description,
           workType: args.workType ?? 'ASSIGNMENT',
-          state: args.state ?? 'PUBLISHED',
+          state: args.scheduledTime ? 'DRAFT' : (args.state ?? 'PUBLISHED'),
+          scheduledTime: args.scheduledTime,
           maxPoints: args.maxPoints,
           topicId: args.topicId,
           ...this.parseDueDateTime(args.dueDate, args.dueTime),
@@ -1070,7 +1077,8 @@ class GoogleClassroomServer {
           title: args.title,
           description: args.description,
           topicId: args.topicId,
-          state: 'PUBLISHED',
+          state: args.scheduledTime ? 'DRAFT' : 'PUBLISHED',
+          scheduledTime: args.scheduledTime,
         };
         if (args.attachments?.length) {
           body.materials = this.mapAttachments(args.attachments);

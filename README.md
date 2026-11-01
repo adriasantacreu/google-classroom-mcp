@@ -21,6 +21,8 @@ AI agents need structured, reliable access to educational platforms to be genuin
 ## Features
 
 - **46 fully implemented tools** — courses, topics, assignments, materials, announcements, submissions, grading, rosters, guardians, rubrics, and Drive file management
+- **Scheduled publishing** — `scheduledTime` on assignments and materials publishes them automatically later
+- **Catalan time for due dates** — `dueTime` is interpreted as Europe/Madrid local time and converted to UTC for the API
 - **Google Drive integration** — upload files to Drive and attach them to assignments; download student submission PDFs
 - **Compact responses by default** — list operations return only essential fields to stay within MCP token limits; pass `fullData: true` for complete objects
 - **OAuth2 authentication** with persistent token storage and automatic refresh
@@ -203,7 +205,7 @@ The server requests the following scopes during `node auth.js`:
 |------|----------------|-----------------|-------------|
 | `classroom_get_assignment` | `courseId`, `id` | — | Get full details of a single assignment |
 | `classroom_list_assignments` | `courseId` | `courseWorkStates`, `pageSize`, `pageToken` | List assignments. `courseWorkStates`: PUBLISHED, DRAFT |
-| `classroom_create_assignment` | `courseId`, `title` | `description`, `workType`, `state`, `maxPoints`, `dueDate` (YYYY-MM-DD), `dueTime` (HH:MM), `topicId`, `attachments` | Create assignment or question |
+| `classroom_create_assignment` | `courseId`, `title` | `description`, `workType`, `state`, `maxPoints`, `dueDate` (YYYY-MM-DD), `dueTime` (HH:MM, Catalan local time), `scheduledTime` (RFC3339), `topicId`, `attachments` | Create assignment or question; with `scheduledTime` it is posted as DRAFT and published automatically at that time |
 | `classroom_patch_assignment` | `courseId`, `id`, `updateMask` | `title`, `description`, `maxPoints`, `topicId`, `dueDate`, `dueTime`, `state` | Partial update via updateMask |
 | `classroom_update_assignment` | `courseId`, `id` | `title`, `description`, `maxPoints`, `dueDate`, `dueTime`, `topicId`, `state` | Full update of all mutable fields |
 | `classroom_delete_assignment` | `courseId`, `id` | — | Permanently delete an assignment |
@@ -225,7 +227,7 @@ The server requests the following scopes during `node auth.js`:
 |------|----------------|-----------------|-------------|
 | `classroom_get_material` | `courseId`, `id` | — | Get full details of a specific material |
 | `classroom_list_materials` | `courseId` | `pageSize` | List all non-graded materials |
-| `classroom_create_material` | `courseId`, `title` | `description`, `topicId`, `attachments` | Create a material post |
+| `classroom_create_material` | `courseId`, `title` | `description`, `topicId`, `scheduledTime` (RFC3339), `attachments` | Create a material post; with `scheduledTime` it is published automatically at that time |
 | `classroom_patch_material` | `courseId`, `id`, `updateMask` | `title`, `description`, `topicId`, `state` | Update material fields |
 | `classroom_delete_material` | `courseId`, `id` | — | Delete a material |
 
